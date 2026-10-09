@@ -18,8 +18,14 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	err := Register(req)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(&req)
+}
+
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+
 }

@@ -6,6 +6,6 @@ import "net/http"
 func Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /auth/register", RegisterUser)
-
+	mux.HandleFunc("POST /auth/login", LoginUser)
 	return mux
 }
