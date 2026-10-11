@@ -10,16 +10,21 @@ import (
 )
 
 func main() {
-	mux := auth.Routes()
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db, err := database.Connection()
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+	service := auth.NewService(db)
+	mux := auth.Routes(service)
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
 	}
-	database.Connection()
-
 	http.ListenAndServe(server.Addr, mux)
 }

@@ -3,9 +3,11 @@ package auth
 
 import "net/http"
 
-func Routes() *http.ServeMux {
+func Routes(service *Service) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /auth/register", RegisterUser)
-	mux.HandleFunc("POST /auth/login", LoginUser)
+	handler := Newhandler(service)
+
+	mux.HandleFunc("POST /auth/register", handler.RegisterUser)
+	mux.HandleFunc("POST /auth/login", handler.LoginUser)
 	return mux
 }

@@ -15,7 +15,8 @@ type Handler struct {
 func Newhandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
+
+func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req models.User
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -23,7 +24,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("Not valid structure")
 		return
 	}
-	err := Register(req)
+	err := h.service.Register(r.Context(), req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
@@ -33,6 +34,6 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&req)
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 }
