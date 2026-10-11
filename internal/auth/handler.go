@@ -8,6 +8,13 @@ import (
 	"github.com/AniketDubey199/models"
 )
 
+type Handler struct {
+	service *Service
+}
+
+func Newhandler(service *Service) *Handler {
+	return &Handler{service: service}
+}
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req models.User
 

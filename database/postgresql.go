@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func Connection() {
+func Connection() (*sql.DB, error) {
 	pass := os.Getenv("POSTGRES_PASSWORD")
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -23,4 +23,5 @@ func Connection() {
 		log.Panic(err)
 	}
 	fmt.Println("Successfully connected!")
+	return db, nil
 }
