@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/mail"
 	"time"
 
 	"github.com/AniketDubey199/models"
@@ -50,16 +51,24 @@ func (s *Service) Register(ctx context.Context, user models.User, response *mode
 	return nil
 }
 
-func (s *Service) Login(ctx context.Context, user *models.UserLogin, username string, password string) error {
-	if username == "" || password == "" {
-		return errors.New("username is empty")
+func (s *Service) Login(ctx context.Context, user *models.UserLogin, userEmail string, password string) error {
+	if userEmail == "" || password == "" {
+		return errors.New("email or password is empty")
 	}
-	query := `select name , password from users where name = $1;`
-	row := s.db.QueryRow(query, username)
-	err := row.Scan(&user.UserName, &user.Password)
+	if _, err := mail.ParseAddress(userEmail); err != nil {
+		return errors.New("Invalid email type")
+	}
+	query := `select email , password from users where email = $1;`
+	row := s.db.QueryRow(query, userEmail)
+	userpass := ""
+	err := row.Scan(&user.Email, &userpass) // change this password should not be visible
 	if err != nil {
 		return errors.New("Db scan not valid")
 	}
-
+	err = DecryptPassword(userpass, password)
+	if err != nil {
+		return errors.New("Password or username is not valid")
+	}
+	user.Password = password
 	return nil
 }

@@ -37,11 +37,11 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
+	userEmail := r.FormValue("email")
 	password := r.FormValue("password")
 
 	var login models.UserLogin
-	err := h.service.Login(r.Context(), &login, username, password)
+	err := h.service.Login(r.Context(), &login, userEmail, password)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())

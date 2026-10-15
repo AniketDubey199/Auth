@@ -45,3 +45,11 @@ func EncryptPassword(password string) string {
 	}
 	return string(bytes)
 }
+
+func DecryptPassword(userpassword string, actualpassword string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(userpassword), []byte(actualpassword))
+	if err != nil {
+		return err
+	}
+	return nil
+}

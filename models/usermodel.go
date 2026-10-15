@@ -14,7 +14,7 @@ type UserReq struct {
 }
 
 type UserLogin struct {
-	UserName string
+	Email    string
 	Password string
 	Token    string
 }
