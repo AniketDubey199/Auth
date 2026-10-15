@@ -21,54 +21,47 @@ func NewService(db *sql.DB) *Service { // think of it as a object of service and
 	}
 }
 
-func (s *Service) Register(ctx context.Context, user models.User, response *models.UserReq) error {
+func (s *Service) Register(ctx context.Context, user models.User, response *models.UserResponse) error {
 	err := Validate(user)
-	if err != nil {
-		return err
-	}
-	createtable := `create table if not exists Users (
-		id serial primary key,
-		name text not null ,
-		email text not null unique, 
-		password text not null,
-		created_at timestamptz not null default now()
-	)`
-	_, err = s.db.Exec(createtable)
 	if err != nil {
 		return err
 	}
 	user.Password = EncryptPassword(user.Password)
 	register := `insert into users (name , email , password) values ($1 , $2 , $3 ) returning id`
 	id := 0
-	err = s.db.QueryRow(register, user.UserName, user.Email, user.Password).Scan(&id)
+	err = s.db.QueryRowContext(ctx, register, user.UserName, user.Email, user.Password).Scan(&id)
 	if err != nil {
 		return err
 	}
 	response.ID = id
-	response.Email = user.UserName
+	response.Email = user.Email
 	response.Created_at = time.Now().Format(time.UnixDate)
 	fmt.Println("The New id inserted is: ", id)
 	return nil
 }
 
-func (s *Service) Login(ctx context.Context, user *models.UserLogin, userEmail string, password string) error {
-	if userEmail == "" || password == "" {
+func (s *Service) Login(ctx context.Context, user *models.UserLogin, uselogin models.LoginRequest) error {
+	var username string
+	if uselogin.Email == "" || uselogin.Password == "" {
 		return errors.New("email or password is empty")
 	}
-	if _, err := mail.ParseAddress(userEmail); err != nil {
+	if _, err := mail.ParseAddress(uselogin.Email); err != nil {
 		return errors.New("Invalid email type")
 	}
-	query := `select email , password from users where email = $1;`
-	row := s.db.QueryRow(query, userEmail)
+	query := `select name ,email , password from users where email = $1;`
+	row := s.db.QueryRowContext(ctx, query, uselogin.Email)
 	userpass := ""
-	err := row.Scan(&user.Email, &userpass) // change this password should not be visible
+	err := row.Scan(&username, &user.Email, &userpass) // change this password should not be visible
 	if err != nil {
 		return errors.New("Db scan not valid")
 	}
-	err = DecryptPassword(userpass, password)
+	err = DecryptPassword(userpass, uselogin.Password)
 	if err != nil {
 		return errors.New("Password or username is not valid")
 	}
-	user.Password = password
+	user.Token, err = GenerateTokens(username)
+
 	return nil
 }
+
+// func (s *Service) GetUserByID(ctx context.Context)

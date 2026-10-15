@@ -18,7 +18,7 @@ func Newhandler(service *Service) *Handler {
 
 func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req models.User
-	var res models.UserReq
+	var res models.UserResponse
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -37,11 +37,12 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	userEmail := r.FormValue("email")
-	password := r.FormValue("password")
+	var loginreq models.LoginRequest
+	loginreq.Email = r.FormValue("email")
+	loginreq.Password = r.FormValue("password")
 
 	var login models.UserLogin
-	err := h.service.Login(r.Context(), &login, userEmail, password)
+	err := h.service.Login(r.Context(), &login, loginreq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
